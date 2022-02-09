@@ -1,15 +1,15 @@
 using Xunit;
-using Slox;
+using Slox.Scanning;
 
 namespace Slox.Test;
 
 public class SloxTest
 {
     [Fact]
-    public void TestSloxLives()
+    public void TestTokenInstance()
     {
-        var instance = new Slox.SloxStub();
+        var token = new Token(TokenType.LeftParen, "(", "(", 0);
 
-        Assert.NotNull(instance);
+        Assert.NotNull(token);
     }
 }
