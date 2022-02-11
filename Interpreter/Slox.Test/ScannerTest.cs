@@ -71,6 +71,34 @@ public class ScannerTest
     }
 
     [Fact]
+    public void TestScanningComment()
+    {
+        var source = @"22 / 7 // approximation for pi";
+        var scanner = new Scanner(source);
+        var tokens = scanner.ScanTokens();
+
+        Assert.Equal(4, tokens.Count);
+
+        // 22
+        Assert.Equal(TokenType.Number, tokens[0].Type);
+        Assert.Equal(22d, tokens[0].Literal);
+        Assert.Equal(1, tokens[0].Line);
+        
+        // /
+        Assert.Equal(TokenType.Slash, tokens[1].Type);
+        Assert.Equal(1, tokens[1].Line);
+        
+        // 7
+        Assert.Equal(TokenType.Number, tokens[2].Type);
+        Assert.Equal(7d, tokens[2].Literal);
+        Assert.Equal(1, tokens[2].Line);
+
+        // EOF
+        Assert.Equal(TokenType.Eof, tokens[3].Type);
+        Assert.Equal(1, tokens[3].Line);
+    }
+
+    [Fact]
     public void TestScanningMultipleLines()
     {
         var source = @"while (true) {

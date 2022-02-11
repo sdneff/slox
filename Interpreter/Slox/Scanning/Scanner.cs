@@ -65,17 +65,11 @@ public class Scanner
             case '<': AddToken(MatchNext('=') ? LessEqual : Less); break;
             case '>': AddToken(MatchNext('=') ? GreaterEqual : Greater); break;
 
-            case '/':
-                if (MatchNext('/'))
-                {
-                    // line comment
-                    while (Peek() != '\n' && !IsAtEnd()) Advance();
-                }
-                else
-                {
-                    AddToken(Slash);
-                }
+            case '/' when MatchNext('/'):
+                // ignore line comment
+                while (Peek() != '\n' && !IsAtEnd()) Advance();
                 break;
+            case '/': AddToken(Slash); break;
 
             case ' ':
             case '\t':
