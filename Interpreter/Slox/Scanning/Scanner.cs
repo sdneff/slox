@@ -51,7 +51,7 @@ public class Scanner
         switch (c)
         {
             case '(': AddToken(LeftParen); break;
-            case ')': AddToken(LeftParen); break;
+            case ')': AddToken(RightParen); break;
             case '{': AddToken(LeftBrace); break;
             case '}': AddToken(RightBrace); break;
             case ',': AddToken(Comma); break;
@@ -125,7 +125,7 @@ public class Scanner
         current++;
         return true;
     }
-    private string CurrentText() => _source.Substring(start, current);
+    private string CurrentText() => _source.Substring(start, current - start);
 
     private void ScanString()
     {
@@ -141,9 +141,9 @@ public class Scanner
             return;
         }
 
-        Advance(); // closing "
+        Advance(); // consume final '"'
 
-        var value = _source.Substring(start + 1, current - 1); // trim quotes
+        var value = _source.Substring(start + 1, current - start - 2); // trim quotes
         AddToken(TokenType.String, value);
     }
 
@@ -154,7 +154,7 @@ public class Scanner
         // handle fractional part
         if (Peek() == '.' && IsDigit(PeekNext()))
         {
-            Advance(); // consume "."
+            Advance(); // consume '.'
     
             while (IsDigit(Peek())) Advance();
         }
