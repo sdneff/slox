@@ -1,4 +1,7 @@
 ﻿using Slox;
+using Slox.Scanning;
+using Slox.ConsoleApp.Reporting;
+using System.Text;
 
 namespace Slox.ConsoleApp;
 
@@ -31,12 +34,26 @@ class Program
         Console.WriteLine("slox interactive:");
         Console.WriteLine();
 
+        var sb = new StringBuilder();
+
         while (true)
         {
             Console.Write("> ");
             var line = Console.ReadLine();
-            if (line == null) break;
-            Run(line);
+            if (line == null)
+            {
+                break;
+            }
+            else if (line.EndsWith("\\"))
+            {
+                sb.AppendLine(line.Substring(0, line.Length - 1));
+            }
+            else
+            {
+                sb.AppendLine(line);
+                Run(sb.ToString());
+                sb.Clear();
+            }
         }
 
         Console.WriteLine();
@@ -45,8 +62,18 @@ class Program
 
     private static void Run(string source)
     {
+        // set up environment
+        Slox.Error = new SimpleErrorReporter();
+
         Console.WriteLine($"running source...");
-        Console.WriteLine(source);
+
+        var scanner = new Scanner(source);
+        var tokens = scanner.ScanTokens();
+
+        foreach (var token in tokens)
+        {
+            Console.WriteLine(token);
+        }
     }
 }
 

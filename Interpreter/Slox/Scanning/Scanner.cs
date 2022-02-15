@@ -96,7 +96,7 @@ public class Scanner
                 }
                 else
                 {
-                    Console.WriteLine("ERROR"); break; // TODO: better error integration
+                    Slox.Error.ReportError(line, "Unexpected character.");
                 }
                 break;
         }
@@ -131,7 +131,7 @@ public class Scanner
 
         if (IsAtEnd())
         {
-            Console.WriteLine("ERROR"); // TODO: better error integration <Unterminated string>
+            Slox.Error.ReportError(line, "Unterminated string.");
             return;
         }
 

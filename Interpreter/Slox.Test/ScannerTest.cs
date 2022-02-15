@@ -150,4 +150,93 @@ public class ScannerTest
         Assert.Equal(TokenType.Eof, tokens[9].Type);
         Assert.Equal(3, tokens[9].Line);
     }
+
+    [Fact]
+    public void TestScanningWithBlankLinesMultiLineString()
+    {
+        var source = @"print ""I'm stuck in a rut,
+stuck in a rut,
+stuck in a rut."";";
+        var scanner = new Scanner(source);
+        var tokens = scanner.ScanTokens();
+
+        Assert.Equal(4, tokens.Count);
+
+        // print
+        Assert.Equal(TokenType.Print, tokens[0].Type);
+        Assert.Equal(1, tokens[0].Line);
+        
+        // "I'm stuck in a rut, stuck in a rut, stuck in a rut."
+        Assert.Equal(TokenType.String, tokens[1].Type);
+        Assert.Equal(@"I'm stuck in a rut,
+stuck in a rut,
+stuck in a rut.", tokens[1].Literal);
+        Assert.Equal(3, tokens[1].Line);
+
+        // ;
+        Assert.Equal(TokenType.Semicolon, tokens[2].Type);
+        Assert.Equal(3, tokens[2].Line);
+
+        // EOF
+        Assert.Equal(TokenType.Eof, tokens[3].Type);
+        Assert.Equal(3, tokens[3].Line);
+    }
+
+   [Fact]
+    public void TestScanningWithBlankLines()
+    {
+        var source = @"while (true) {
+
+
+
+    print ""I'm stuck in a rut, stuck in a rut, stuck in a rut."";
+
+}";
+        var scanner = new Scanner(source);
+        var tokens = scanner.ScanTokens();
+
+        Assert.Equal(10, tokens.Count);
+
+        // while
+        Assert.Equal(TokenType.While, tokens[0].Type);
+        Assert.Equal(1, tokens[0].Line);
+        
+        // (
+        Assert.Equal(TokenType.LeftParen, tokens[1].Type);
+        Assert.Equal(1, tokens[1].Line);
+        
+        // true
+        Assert.Equal(TokenType.True, tokens[2].Type);
+        Assert.Equal(1, tokens[2].Line);
+        
+        // )
+        Assert.Equal(TokenType.RightParen, tokens[3].Type);
+        Assert.Equal(1, tokens[3].Line);
+        
+        // {
+        Assert.Equal(TokenType.LeftBrace, tokens[4].Type);
+        Assert.Equal(1, tokens[4].Line);
+        
+        // print
+        Assert.Equal(TokenType.Print, tokens[5].Type);
+        Assert.Equal(5, tokens[5].Line);
+
+        // "I'm stuck in a rut, stuck in a rut, stuck in a rut."
+        Assert.Equal(TokenType.String, tokens[6].Type);
+        Assert.Equal("I'm stuck in a rut, stuck in a rut, stuck in a rut.", tokens[6].Literal);
+        Assert.Equal(5, tokens[6].Line);
+
+        // ;
+        Assert.Equal(TokenType.Semicolon, tokens[7].Type);
+        Assert.Equal(5, tokens[7].Line);
+
+        // }
+        Assert.Equal(TokenType.RightBrace, tokens[8].Type);
+        Assert.Equal(7, tokens[8].Line);
+
+        // EOF
+        Assert.Equal(TokenType.Eof, tokens[9].Type);
+        Assert.Equal(7, tokens[9].Line);
+    }
+    
 }
