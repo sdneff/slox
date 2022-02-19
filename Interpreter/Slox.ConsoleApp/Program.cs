@@ -1,5 +1,4 @@
-﻿using Slox;
-using Slox.Scanning;
+﻿using Slox.Scanning;
 using Slox.ConsoleApp.Reporting;
 using System.Text;
 
@@ -44,7 +43,7 @@ class Program
             {
                 break;
             }
-            else if (line.EndsWith("\\"))
+            else if (line.EndsWith(@"\"))
             {
                 sb.AppendLine(line.Substring(0, line.Length - 1));
             }
