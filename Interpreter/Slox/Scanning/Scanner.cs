@@ -31,11 +31,15 @@ public class Scanner
     private int current = 0;
     private int line = 1;
 
+    private bool IsAtEnd => current >= _source.Length;
+    private char CurrentChar => IsAtEnd ? default : _source[current];
+    private char NextChar => current + 1 >= _source.Length ? default : _source[current + 1];
+
     public Scanner(string source) => _source = source;
 
     public IList<Token> ScanTokens()
     {
-        while (!IsAtEnd())
+        while (!IsAtEnd)
         {
             start = current;
             ScanToken();
@@ -68,7 +72,7 @@ public class Scanner
 
             case '/' when MatchNext('/'):
                 // ignore line comment
-                while (Peek() != '\n' && !IsAtEnd()) Advance();
+                while (CurrentChar!= '\n' && !IsAtEnd) Advance();
                 break;
             case '/': AddToken(Slash); break;
 
@@ -108,13 +112,10 @@ public class Scanner
         _tokens.Add(new Token(type, CurrentText(), literal, line));
     }
 
-    private bool IsAtEnd() => current >= _source.Length;
     private char Advance() => _source[current++];
-    private char Peek() => IsAtEnd() ? default : _source[current];
-    private char PeekNext() => current + 1 >= _source.Length ? default : _source[current + 1];
     private bool MatchNext(char expected)
     {
-        if (IsAtEnd()) return false;
+        if (IsAtEnd) return false;
         if (_source[current] != expected) return false;
 
         current++;
@@ -124,13 +125,13 @@ public class Scanner
 
     private void ScanString()
     {
-        while (Peek() != '"' && !IsAtEnd())
+        while (CurrentChar!= '"' && !IsAtEnd)
         {
-            if (Peek() == '\n') line++;
+            if (CurrentChar== '\n') line++;
             Advance();
         }
 
-        if (IsAtEnd())
+        if (IsAtEnd)
         {
             Slox.Error.ReportError(line, "Unterminated string.");
             return;
@@ -144,14 +145,14 @@ public class Scanner
 
     private void ScanNumber()
     {
-        while (IsDigit(Peek())) Advance();
+        while (IsDigit(CurrentChar)) Advance();
 
         // handle fractional part
-        if (Peek() == '.' && IsDigit(PeekNext()))
+        if (CurrentChar== '.' && IsDigit(NextChar))
         {
             Advance(); // consume '.'
     
-            while (IsDigit(Peek())) Advance();
+            while (IsDigit(CurrentChar)) Advance();
         }
 
         AddToken(Number, double.Parse(CurrentText()));
@@ -159,7 +160,7 @@ public class Scanner
 
     private void ScanIdentifier()
     {
-        while (IsAlphaNumeric(Peek())) Advance();
+        while (IsAlphaNumeric(CurrentChar)) Advance();
 
         var type = Keywords.TryGetValue(CurrentText(), out var k) ? k : Identifier;
         AddToken(type);

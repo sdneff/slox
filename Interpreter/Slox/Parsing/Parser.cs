@@ -11,9 +11,9 @@ public class Parser
     private readonly IList<Token> _tokens;
     private int current = 0;
 
-    private bool IsAtEnd => Peek.Type == Eof;
-    private Token Peek => _tokens[current];
-    private Token Previous => _tokens[current - 1];
+    private bool IsAtEnd => CurrentToken.Type == Eof;
+    private Token CurrentToken => _tokens[current];
+    private Token PreviousToken => _tokens[current - 1];
 
     public Parser(IEnumerable<Token> tokens)
     {
@@ -51,7 +51,7 @@ public class Parser
     private Expr Unary()
     {
         if (Match(Bang, Minus)) {
-            var @operator = Previous;
+            var @operator = PreviousToken;
             var right = Unary();
             return new Expr.Unary(@operator, right);
         }
@@ -66,7 +66,7 @@ public class Parser
         if (Match(True)) return new Expr.Literal(true);
         if (Match(Nil)) return new Expr.Literal(null);
 
-        if (Match(Number, TokenType.String)) return new Expr.Literal(Previous.Literal);
+        if (Match(Number, TokenType.String)) return new Expr.Literal(PreviousToken.Literal);
 
         if (Match(LeftParen))
         {
@@ -75,7 +75,7 @@ public class Parser
             return new Expr.Grouping(expr);
         }
 
-        throw Error(Peek, "Expect expression.");
+        throw Error(CurrentToken, "Expect expression.");
     }
 
     private Expr ParseBinary(Func<Expr> operand, params TokenType[] operators)
@@ -83,7 +83,7 @@ public class Parser
         var expr = operand();
         while (Match(operators))
         {
-            var @operator = Previous;
+            var @operator = PreviousToken;
             var right = operand();
             expr = new Expr.Binary(expr, @operator, right);
         }
@@ -101,18 +101,18 @@ public class Parser
         return false;
     }
 
-    private bool Check(TokenType type) => !IsAtEnd && Peek.Type == type;
+    private bool Check(TokenType type) => !IsAtEnd && CurrentToken.Type == type;
 
     private Token Advance() {
         if (!IsAtEnd) current++;
-        return Previous;
+        return PreviousToken;
     }
 
     private Token Consume(TokenType type, string message)
     {
         if (Check(type)) return Advance();
 
-        throw Error(Peek, message);
+        throw Error(CurrentToken, message);
     }
 
     private ParserError Error(Token token, string message)
@@ -126,9 +126,9 @@ public class Parser
         Advance();
         while (!IsAtEnd)
         {
-            if (Previous.Type == Semicolon) return;
+            if (PreviousToken.Type == Semicolon) return;
 
-            switch (Peek.Type)
+            switch (CurrentToken.Type)
             {
                 case Class:
                 case For:
