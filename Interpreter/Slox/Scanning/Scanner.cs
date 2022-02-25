@@ -72,7 +72,7 @@ public class Scanner
 
             case '/' when MatchNext('/'):
                 // ignore line comment
-                while (CurrentChar!= '\n' && !IsAtEnd) Advance();
+                AdvanceWhile(c => c != '\n');
                 break;
             case '/': AddToken(Slash); break;
 
@@ -113,6 +113,10 @@ public class Scanner
     }
 
     private char Advance() => _source[current++];
+    private void AdvanceWhile(Func<char, bool> match)
+    {
+        while (match(CurrentChar) && !IsAtEnd) Advance();
+    }
     private bool MatchNext(char expected)
     {
         if (IsAtEnd) return false;
@@ -125,9 +129,9 @@ public class Scanner
 
     private void ScanString()
     {
-        while (CurrentChar!= '"' && !IsAtEnd)
+        while (CurrentChar != '"' && !IsAtEnd)
         {
-            if (CurrentChar== '\n') line++;
+            if (CurrentChar == '\n') line++;
             Advance();
         }
 
@@ -145,14 +149,14 @@ public class Scanner
 
     private void ScanNumber()
     {
-        while (IsDigit(CurrentChar)) Advance();
+        AdvanceWhile(IsDigit);
 
         // handle fractional part
-        if (CurrentChar== '.' && IsDigit(NextChar))
+        if (CurrentChar == '.' && IsDigit(NextChar))
         {
             Advance(); // consume '.'
     
-            while (IsDigit(CurrentChar)) Advance();
+            AdvanceWhile(IsDigit);
         }
 
         AddToken(Number, double.Parse(CurrentText()));
