@@ -5,7 +5,6 @@ using static Slox.Scanning.TokenType;
 
 namespace Slox.Parsing;
 
-
 public class Parser
 {
     private readonly IList<Token> _tokens;
