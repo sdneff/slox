@@ -1,4 +1,6 @@
-﻿using Slox.Scanning;
+﻿using Slox.Parsing;
+using Slox.Syntax;
+using Slox.Scanning;
 using Slox.ConsoleApp.Reporting;
 using System.Text;
 
@@ -66,12 +68,23 @@ class Program
 
         Console.WriteLine($"running source...");
 
+        // parse
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
 
         foreach (var token in tokens)
         {
             Console.WriteLine(token);
+        }
+
+        var parser = new Parser(tokens);
+        var expr = parser.Parse();
+
+        // print
+        if (expr != null)
+        {
+            var printer = new SExpressionAstPrinter();
+            Console.WriteLine(printer.Print(expr));
         }
     }
 }

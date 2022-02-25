@@ -55,7 +55,8 @@ public class Scanner
             case '{': AddToken(LeftBrace); break;
             case '}': AddToken(RightBrace); break;
             case ',': AddToken(Comma); break;
-            case '.': AddToken(Minus); break;
+            case '.': AddToken(Dot); break;
+            case '-': AddToken(Minus); break;
             case '+': AddToken(Plus); break;
             case ';': AddToken(Semicolon); break;
             case '*': AddToken(Star); break;
