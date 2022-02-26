@@ -19,14 +19,15 @@ public class Parser
         _tokens = tokens.ToList();
     }
 
-    // program    -> statement* EOF ;
+    // program     -> statement* EOF ;
     public IList<Stmt> Parse()
     {
         var statements = new List<Stmt>();
 
         while (!IsAtEnd)
         {
-            statements.Add(Statement());
+            var decl = Declaration();
+            if (decl != null) statements.Add(decl);
         }
 
         return statements;
@@ -38,13 +39,44 @@ public class Parser
         {
             return Expression();
         }
-        catch (ParserError)
+        catch (ParseError)
         {
             return null;
         }
     }
 
-    // statement  -> exprStmt | printStmt ;
+    // declaration -> varDecl | statement ;
+    private Stmt? Declaration()
+    {
+        try
+        {
+            if (Match(Var)) return VarDeclaration();
+            return Statement();
+        }
+        catch (ParseError)
+        {
+            Synchronize();
+            return null;
+        }
+    }
+
+
+    // varDecl     -> "var" IDENTIFIER ( "=" expression)? ";" ;
+    private Stmt VarDeclaration()
+    {
+        var name = Consume(Identifier, "Expcet variable name.");
+
+        Expr? initializer = null;
+        if (Match(Equal))
+        {
+            initializer = Expression();
+        }
+        Consume(Semicolon, "Expect ';' after expression.");
+        return new Stmt.Var(name, initializer);
+    }
+
+
+    // statement   -> exprStmt | printStmt ;
     private Stmt Statement()
     {
         if (Match(Print)) return PrintStatement();
@@ -52,7 +84,7 @@ public class Parser
         return ExpressionStatement();
     }
 
-    // exprStmt   -> expression ";" ;
+    // exprStmt    -> expression ";" ;
     private Stmt ExpressionStatement()
     {
         var expr = Expression();
@@ -60,7 +92,7 @@ public class Parser
         return new Stmt.Expression(expr);
     }
 
-    // printStmt  -> "print" expression ";" ;
+    // printStmt   -> "print" expression ";" ;
     private Stmt PrintStatement()
     {
         var expr = Expression();
@@ -68,22 +100,22 @@ public class Parser
         return new Stmt.Print(expr);
     }
 
-    // expression -> equality ;
+    // expression  -> equality ;
     private Expr Expression() => Equality();
 
-    // equality   -> comparison ( ( "!=" | "==" ) comparison )* ;
+    // equality    -> comparison ( ( "!=" | "==" ) comparison )* ;
     private Expr Equality() => ParseBinary(Comparison, BangEqual, EqualEqual);
 
-    // comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+    // comparison  -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
     private Expr Comparison() => ParseBinary(Term, Greater, GreaterEqual, Less, LessEqual);
 
-    // term       -> factor ( ( "-" | "+" ) factor)* ;
+    // term        -> factor ( ( "-" | "+" ) factor)* ;
     private Expr Term() => ParseBinary(Factor, Minus, Plus);
 
-    // factor     -> unary ( ( "/" | "*" ) unary)* ;
+    // factor      -> unary ( ( "/" | "*" ) unary)* ;
     private Expr Factor() => ParseBinary(Unary, Slash, Star);
 
-    // unary      -> ( "!" | "-" ) unary | primary ;
+    // unary       -> ( "!" | "-" ) unary | primary ;
     private Expr Unary()
     {
         if (Match(Bang, Minus)) {
@@ -95,7 +127,7 @@ public class Parser
         return Primary();
     }
 
-    // primary    -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+    // primary     -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
     private Expr Primary()
     {
         if (Match(False)) return new Expr.Literal(false);
@@ -103,6 +135,8 @@ public class Parser
         if (Match(Nil)) return new Expr.Literal(null);
 
         if (Match(Number, TokenType.String)) return new Expr.Literal(PreviousToken.Literal);
+
+        if (Match(Identifier)) return new Expr.Variable(PreviousToken);
 
         if (Match(LeftParen))
         {
@@ -151,10 +185,10 @@ public class Parser
         throw Error(CurrentToken, message);
     }
 
-    private ParserError Error(Token token, string message)
+    private ParseError Error(Token token, string message)
     {
         Slox.Error.ReportError(token, message);
-        return new ParserError();
+        return new ParseError();
     }
 
     private void Synchronize()

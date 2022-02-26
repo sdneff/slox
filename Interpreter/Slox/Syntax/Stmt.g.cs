@@ -13,12 +13,18 @@ public abstract record Stmt
     public interface IVisitor<T>
     {
         T VisitExpressionStmt(Expression stmt);
+        T VisitVarStmt(Var stmt);
         T VisitPrintStmt(Print stmt);
     }
 
     public record Expression(Expr Expr) : Stmt()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitExpressionStmt(this);
+    }
+
+    public record Var(Token Name, Expr? Initializer) : Stmt()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitVarStmt(this);
     }
 
     public record Print(Expr Expr) : Stmt()

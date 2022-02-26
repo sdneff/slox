@@ -35,6 +35,11 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         }
     }
 
+    public Unit VisitVarStmt(Stmt.Var stmt)
+    {
+        throw new NotImplementedException();
+    }
+
     public Unit VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt.Expr);
@@ -97,6 +102,12 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
                 return null as object; // unreachable
         };
     }
+
+    public object? VisitVariableExpr(Expr.Variable expr)
+    {
+        throw new NotImplementedException();
+    }
+
 
     private void Execute(Stmt stmt) => stmt.Accept(this);
     private object? Evaluate(Expr expr) => expr.Accept(this);

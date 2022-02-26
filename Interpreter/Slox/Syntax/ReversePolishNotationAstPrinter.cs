@@ -17,6 +17,11 @@ public class ReversePolishNotationAstPrinter : IAstPrinter
 
         public IEnumerable<string> VisitUnaryExpr(Expr.Unary expr) => AsStack(expr.Operator.Lexeme, expr.Right);
 
+        public IEnumerable<string> VisitVariableExpr(Expr.Variable expr)
+        {
+            yield return expr.Name.ToString();
+        }
+
         private IEnumerable<string> AsStack(string name, params Expr[] exprs) => exprs.SelectMany(e => e.Accept(this)).Append(name);
     }
 }

@@ -51,9 +51,9 @@ public class ParseTreeCommand : ICommand
                     break;
             }
         }
-        catch (ParserError)
+        catch (ParseError)
         {
-            Console.WriteLine("PARSER ERROR");
+            Console.WriteLine("PARSE ERROR");
         }
     }
 

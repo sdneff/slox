@@ -86,9 +86,9 @@ class Program
             var interpreter = new Interpreter();
             interpreter.Interpret(statements);
         }
-        catch (ParserError)
+        catch (ParseError)
         {
-            Console.WriteLine("PARSER ERROR");
+            Console.WriteLine("PARSE ERROR");
         }
         catch (RuntimeError)
         {

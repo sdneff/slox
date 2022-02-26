@@ -23,12 +23,14 @@ class Program
             "Binary   : Expr Left, Token Operator, Expr Right",
             "Grouping : Expr Expression",
             "Literal  : object? Value",
+            "Variable : Token Name",
             "Unary    : Token Operator, Expr Right"
         });
 
         await AstGenerator.DefineAst(dir, "Stmt", new List<string>
         {
             "Expression : Expr Expr",
+            "Var        : Token Name, Expr? Initializer",
             "Print      : Expr Expr"
         });
 
