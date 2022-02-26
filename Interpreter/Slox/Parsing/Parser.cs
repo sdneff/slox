@@ -7,7 +7,7 @@ namespace Slox.Parsing;
 
 public class Parser
 {
-    private readonly IList<Token> _tokens;
+    private readonly List<Token> _tokens = new();
     private int current = 0;
 
     private bool IsAtEnd => CurrentToken.Type == Eof;
@@ -16,7 +16,7 @@ public class Parser
 
     public Parser(IEnumerable<Token> tokens)
     {
-        _tokens = tokens.ToList();
+        _tokens.AddRange(tokens);
     }
 
     // program     -> statement* EOF ;
