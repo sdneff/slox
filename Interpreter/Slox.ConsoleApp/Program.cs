@@ -1,9 +1,9 @@
-﻿using Slox.Evaluation;
-using Slox.Parsing;
-using Slox.Syntax;
-using Slox.Scanning;
+﻿using System.Text;
+using Slox.ConsoleApp.Commands;
 using Slox.ConsoleApp.Reporting;
-using System.Text;
+using Slox.Evaluation;
+using Slox.Parsing;
+using Slox.Scanning;
 
 namespace Slox.ConsoleApp;
 
@@ -53,7 +53,7 @@ class Program
             else
             {
                 sb.AppendLine(line);
-                Run(sb.ToString());
+                Run(sb.ToString(), true);
                 sb.Clear();
             }
         }
@@ -62,32 +62,24 @@ class Program
         Console.WriteLine("bye!");
     }
 
-    private static void Run(string source)
+    private static void Run(string source, bool enableCommands = false)
     {
         // set up environment
         Slox.Error = new SimpleErrorReporter();
         Slox.Result = new SimpleResultReporter();
 
-        Console.WriteLine($"running source...");
-
-        // parse
-        var scanner = new Scanner(source);
-        var tokens = scanner.ScanTokens();
-
-        foreach (var token in tokens)
+        if (enableCommands && CommandReader.HandleInput(source))
         {
-            Console.WriteLine(token);
+            return;
         }
 
+        var scanner = new Scanner(source);
+        var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens);
         var expr = parser.Parse();
 
-        // print
         if (expr != null)
         {
-            var printer = new SExpressionAstPrinter();
-            Console.WriteLine(printer.Print(expr));
-    
             // evaluate
             var interpreter = new Interpreter();
             interpreter.Interpret(expr);
