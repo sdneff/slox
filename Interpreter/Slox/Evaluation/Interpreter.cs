@@ -7,6 +7,8 @@ namespace Slox.Evaluation;
 
 public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 {
+    private readonly Environment _environment = new();
+
     public void Interpret(IEnumerable<Stmt> statements)
     {
         try
@@ -37,7 +39,13 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     public Unit VisitVarStmt(Stmt.Var stmt)
     {
-        throw new NotImplementedException();
+        _environment.Define(
+            stmt.Name.Lexeme,
+            stmt.Initializer != null
+                ? Evaluate(stmt.Initializer)
+                : null as object);
+
+        return unit;
     }
 
     public Unit VisitExpressionStmt(Stmt.Expression stmt)
@@ -103,11 +111,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         };
     }
 
-    public object? VisitVariableExpr(Expr.Variable expr)
-    {
-        throw new NotImplementedException();
-    }
-
+    public object? VisitVariableExpr(Expr.Variable expr) => _environment.Get(expr.Name);
 
     private void Execute(Stmt stmt) => stmt.Accept(this);
     private object? Evaluate(Expr expr) => expr.Accept(this);
