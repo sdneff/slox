@@ -127,18 +127,8 @@ public class Parser
         {
             if (PreviousToken.Type == Semicolon) return;
 
-            switch (CurrentToken.Type)
-            {
-                case Class:
-                case For:
-                case Fun:
-                case If:
-                case Print:
-                case Return:
-                case Var:
-                case While:
-                    return;
-            }
+            if (CurrentToken.Type is
+                Class or For or Fun or If or Print or Return or Var or While) return;
 
             Advance();
         }

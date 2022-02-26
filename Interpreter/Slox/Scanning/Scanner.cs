@@ -76,9 +76,7 @@ public class Scanner
                 break;
             case '/': AddToken(Slash); break;
 
-            case ' ':
-            case '\t':
-            case '\r':
+            case ' ' or '\t' or '\r':
                 // ignore whitespace
                 break;
             

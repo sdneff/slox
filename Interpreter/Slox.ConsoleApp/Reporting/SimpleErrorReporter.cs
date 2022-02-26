@@ -1,3 +1,4 @@
+using Slox.Evaluation;
 using Slox.Reporting;
 using Slox.Scanning;
 
@@ -20,5 +21,10 @@ public class SimpleErrorReporter : IErrorReporter
         {
             ReportError(token.Line, $"at '{token.Lexeme}'. {message}");
         }
+    }
+
+    public void ReportError(RuntimeError error)
+    {
+        ReportError(error.Token.Line, error.Message);
     }
 }

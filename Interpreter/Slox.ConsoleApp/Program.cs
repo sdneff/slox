@@ -1,4 +1,5 @@
-﻿using Slox.Parsing;
+﻿using Slox.Evaluation;
+using Slox.Parsing;
 using Slox.Syntax;
 using Slox.Scanning;
 using Slox.ConsoleApp.Reporting;
@@ -65,6 +66,7 @@ class Program
     {
         // set up environment
         Slox.Error = new SimpleErrorReporter();
+        Slox.Result = new SimpleResultReporter();
 
         Console.WriteLine($"running source...");
 
@@ -85,6 +87,10 @@ class Program
         {
             var printer = new SExpressionAstPrinter();
             Console.WriteLine(printer.Print(expr));
+    
+            // evaluate
+            var interpreter = new Interpreter();
+            interpreter.Interpret(expr);
         }
     }
 }
