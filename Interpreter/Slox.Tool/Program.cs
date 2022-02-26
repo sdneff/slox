@@ -2,7 +2,7 @@
 
 class Program
 {
-    internal static void Main(string[] args)
+    internal static async Task Main(string[] args)
     {
         if (args.Length != 1)
         {
@@ -18,7 +18,7 @@ class Program
             return;
         }
 
-        AstGenerator.DefineAst(dir, "Expr", new List<string>
+        await AstGenerator.DefineAst(dir, "Expr", new List<string>
         {
             "Binary   : Expr Left, Token Operator, Expr Right",
             "Grouping : Expr Expression",
