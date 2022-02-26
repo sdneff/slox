@@ -1,11 +1,15 @@
 namespace Slox.Syntax;
 
-public class SExpressionAstPrinter : Expr.IVisitor<string>, IAstPrinter
+public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string>, IAstPrinter
 {
+    public string Print(Stmt stmt) => stmt.Accept(this);
     public string Print(Expr expr) => expr.Accept(this);
 
-    public string VisitBinaryExpr(Expr.Binary expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
+    public string VisitExpressionStmt(Stmt.Expression stmt) => Print(stmt.Expr);
 
+    public string VisitPrintStmt(Stmt.Print stmt) => Parenthesize("print", stmt.Expr);
+
+    public string VisitBinaryExpr(Expr.Binary expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     public string VisitGroupingExpr(Expr.Grouping expr) => Parenthesize("group", expr.Expression);
 
     public string VisitLiteralExpr(Expr.Literal expr) => expr.Value?.ToString() ?? "nil";

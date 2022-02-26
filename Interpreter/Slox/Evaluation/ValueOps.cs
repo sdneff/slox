@@ -1,6 +1,6 @@
 namespace Slox.Evaluation;
 
-public static class ValueOps
+public static class Values
 {
     public static bool IsTruthy(object? obj) => obj is bool b
         ? b
@@ -10,7 +10,7 @@ public static class ValueOps
         ? obj2 is null
         : obj1.Equals(obj2);
 
-    public static string Stringify(object? obj)
+    public static string Stringify(object? obj, bool quoteStrings = false)
     {
         if (obj is null) return "nil";
 
@@ -21,6 +21,17 @@ public static class ValueOps
             return s.Substring(0, s.Length - 2);
         }
 
+        if (quoteStrings && obj is string)
+        {
+            s = @$"""{s}""";
+        }
+
         return s;
+    }
+
+    public static readonly Unit unit = Unit.Unit;
+    public enum Unit
+    {
+        Unit
     }
 }

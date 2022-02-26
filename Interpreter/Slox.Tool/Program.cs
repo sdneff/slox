@@ -26,6 +26,12 @@ class Program
             "Unary    : Token Operator, Expr Right"
         });
 
+        await AstGenerator.DefineAst(dir, "Stmt", new List<string>
+        {
+            "Expression : Expr Expr",
+            "Print      : Expr Expr"
+        });
+
         Console.WriteLine($"AST code generated and written to: {dir.FullName}.");
     }
 }

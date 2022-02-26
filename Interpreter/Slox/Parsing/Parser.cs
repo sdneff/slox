@@ -19,7 +19,20 @@ public class Parser
         _tokens = tokens.ToList();
     }
 
-    public Expr? Parse()
+    // program    -> statement* EOF ;
+    public IList<Stmt> Parse()
+    {
+        var statements = new List<Stmt>();
+
+        while (!IsAtEnd)
+        {
+            statements.Add(Statement());
+        }
+
+        return statements;
+    }
+
+    public Expr? ParseExpression()
     {
         try
         {
@@ -29,6 +42,30 @@ public class Parser
         {
             return null;
         }
+    }
+
+    // statement  -> exprStmt | printStmt ;
+    private Stmt Statement()
+    {
+        if (Match(Print)) return PrintStatement();
+
+        return ExpressionStatement();
+    }
+
+    // exprStmt   -> expression ";" ;
+    private Stmt ExpressionStatement()
+    {
+        var expr = Expression();
+        Consume(Semicolon, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
+
+    // printStmt  -> "print" expression ";" ;
+    private Stmt PrintStatement()
+    {
+        var expr = Expression();
+        Consume(Semicolon, "Expect ';' after value.");
+        return new Stmt.Print(expr);
     }
 
     // expression -> equality ;

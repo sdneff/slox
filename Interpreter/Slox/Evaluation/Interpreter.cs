@@ -1,23 +1,51 @@
 using Slox.Syntax;
 using static Slox.Scanning.TokenType;
-using static Slox.Evaluation.ValueOps;
+using static Slox.Evaluation.Values;
 using static Slox.Evaluation.RuntimeTypes;
 
 namespace Slox.Evaluation;
 
-public class Interpreter : Expr.IVisitor<object?>
+public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 {
-    public void Interpret(Expr expression)
+    public void Interpret(IEnumerable<Stmt> statements)
     {
         try
         {
-            var value = Evaluate(expression);
-            Slox.Result.ReportResult(Stringify(value));
+            foreach (var stmt in statements)
+            {
+                Execute(stmt);
+            }
         }
         catch (RuntimeError err)
         {
             Slox.Error.ReportError(err);
         }
+    }
+
+    public void Interpret(Expr expression)
+    {
+        try
+        {
+            var value = Evaluate(expression);
+            Slox.Out.ReportResult(Stringify(value, true));
+        }
+        catch (RuntimeError err)
+        {
+            Slox.Error.ReportError(err);
+        }
+    }
+
+    public Unit VisitExpressionStmt(Stmt.Expression stmt)
+    {
+        Evaluate(stmt.Expr);
+        return unit;
+    }
+
+    public Unit VisitPrintStmt(Stmt.Print stmt)
+    {
+        var value = Evaluate(stmt.Expr);
+        Slox.Out.Print(Stringify(value));
+        return unit;
     }
 
     public object? VisitBinaryExpr(Expr.Binary expr)
@@ -70,5 +98,6 @@ public class Interpreter : Expr.IVisitor<object?>
         };
     }
 
+    private void Execute(Stmt stmt) => stmt.Accept(this);
     private object? Evaluate(Expr expr) => expr.Accept(this);
 }

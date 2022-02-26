@@ -37,17 +37,19 @@ class Program
         Console.WriteLine();
 
         var sb = new StringBuilder();
+        var multiline = false;
 
         while (true)
         {
-            Console.Write("> ");
+            Console.Write(multiline ? "  " : "> ");
             var line = Console.ReadLine();
-            if (line == null)
+            if (line == null || CommandReader.IsQuitCommand(line))
             {
                 break;
             }
             else if (line.EndsWith(@"\"))
             {
+                multiline = true;
                 sb.AppendLine(line.Substring(0, line.Length - 1));
             }
             else
@@ -66,24 +68,31 @@ class Program
     {
         // set up environment
         Slox.Error = new SimpleErrorReporter();
-        Slox.Result = new SimpleResultReporter();
+        Slox.Out = new SimpleOutputReporter();
 
         if (enableCommands && CommandReader.HandleInput(source))
         {
             return;
         }
 
-        var scanner = new Scanner(source);
-        var tokens = scanner.ScanTokens();
-        var parser = new Parser(tokens);
-        var expr = parser.Parse();
-
-        if (expr != null)
+        try
         {
-            // evaluate
+            var scanner = new Scanner(source);
+            var tokens = scanner.ScanTokens();
+
+            var parser = new Parser(tokens);
+            var statements = parser.Parse();
+
             var interpreter = new Interpreter();
-            interpreter.Interpret(expr);
+            interpreter.Interpret(statements);
+        }
+        catch (ParserError)
+        {
+            Console.WriteLine("PARSER ERROR");
+        }
+        catch (RuntimeError)
+        {
+            Console.WriteLine("RUNTIME ERROR");
         }
     }
 }
-

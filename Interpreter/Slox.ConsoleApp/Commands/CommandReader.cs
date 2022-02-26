@@ -2,6 +2,12 @@ namespace Slox.ConsoleApp.Commands;
 
 public static class CommandReader
 {
+    public static bool IsQuitCommand(string sourceIn)
+    {
+        var (cmd, _) = ParseCommand(sourceIn);
+        return cmd == "quit";
+    }
+
     public static bool HandleInput(string sourceIn)
     {
         var (cmd, sourceOut) = ParseCommand(sourceIn);
@@ -10,7 +16,10 @@ public static class CommandReader
         ICommand command = cmd switch
         {
             "token" => new TokenizeCommand(),
+            "parse-e" => new ParseTreeCommand(ParseTreeCommand.Type.Expression),
+            "parse-s" => new ParseTreeCommand(ParseTreeCommand.Type.Statement),
             "parse" => new ParseTreeCommand(),
+            "eval"  => new EvaluateExpressionCommand(),
             _ => new UnknownCommand(cmd)
         };
 
