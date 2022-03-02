@@ -61,7 +61,7 @@ public class Parser
     }
 
 
-    // varDecl     -> "var" IDENTIFIER ( "=" expression)? ";" ;
+    // varDecl     -> "var" IDENTIFIER ( "=" expression )? ";" ;
     private Stmt VarDeclaration()
     {
         var name = Consume(Identifier, "Expcet variable name.");
@@ -130,10 +130,10 @@ public class Parser
     // comparison  -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
     private Expr Comparison() => ParseBinary(Term, Greater, GreaterEqual, Less, LessEqual);
 
-    // term        -> factor ( ( "-" | "+" ) factor)* ;
+    // term        -> factor ( ( "-" | "+" ) factor )* ;
     private Expr Term() => ParseBinary(Factor, Minus, Plus);
 
-    // factor      -> unary ( ( "/" | "*" ) unary)* ;
+    // factor      -> unary ( ( "/" | "*" ) unary )* ;
     private Expr Factor() => ParseBinary(Unary, Slash, Star);
 
     // unary       -> ( "!" | "-" ) unary | primary ;
@@ -148,7 +148,7 @@ public class Parser
         return Primary();
     }
 
-    // primary     -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+    // primary     -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;
     private Expr Primary()
     {
         if (Match(False)) return new Expr.Literal(false);
