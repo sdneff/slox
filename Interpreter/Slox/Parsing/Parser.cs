@@ -100,8 +100,29 @@ public class Parser
         return new Stmt.Print(expr);
     }
 
-    // expression  -> equality ;
-    private Expr Expression() => Equality();
+    // expression  -> assignment ;
+    private Expr Expression() => Assignment();
+    
+    // assignment  -> IDENTIFIER "=" assignment | equality ;
+    private Expr Assignment() {
+        var expr = Equality();
+
+        if (Match(Equal))
+        {
+            var equals = PreviousToken;
+            var value = Equality();
+
+            if (expr is Expr.Variable @var)
+            {
+                var name = @var.Name;
+                return new Expr.Assign(name, value);
+            }
+
+            Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
 
     // equality    -> comparison ( ( "!=" | "==" ) comparison )* ;
     private Expr Equality() => ParseBinary(Comparison, BangEqual, EqualEqual);

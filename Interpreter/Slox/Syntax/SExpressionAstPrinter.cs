@@ -13,7 +13,10 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
 
     public string VisitPrintStmt(Stmt.Print stmt) => Parenthesize("print", stmt.Expr);
 
+    public string VisitAssignExpr(Expr.Assign expr) => Parenthesize("set " + expr.Name.Lexeme, expr.Value);
+
     public string VisitBinaryExpr(Expr.Binary expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
+    
     public string VisitGroupingExpr(Expr.Grouping expr) => Parenthesize("group", expr.Expression);
 
     public string VisitLiteralExpr(Expr.Literal expr) => expr.Value?.ToString() ?? "nil";

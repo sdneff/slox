@@ -6,6 +6,8 @@ public class ReversePolishNotationAstPrinter : IAstPrinter
 
     private class RPNVisitor : Expr.IVisitor<IEnumerable<string>>
     {
+        public IEnumerable<string> VisitAssignExpr(Expr.Assign expr) => AsStack(":= " + expr.Name.Lexeme, expr.Value);
+
         public IEnumerable<string> VisitBinaryExpr(Expr.Binary expr) => AsStack(expr.Operator.Lexeme, expr.Left, expr.Right);
 
         public IEnumerable<string> VisitGroupingExpr(Expr.Grouping expr) => AsStack("group", expr.Expression);

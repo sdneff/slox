@@ -20,6 +20,7 @@ class Program
 
         await AstGenerator.DefineAst(dir, "Expr", new List<string>
         {
+            "Assign   : Token Name, Expr Value",
             "Binary   : Expr Left, Token Operator, Expr Right",
             "Grouping : Expr Expression",
             "Literal  : object? Value",
