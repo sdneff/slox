@@ -12,9 +12,15 @@ public abstract record Stmt
 
     public interface IVisitor<T>
     {
+        T VisitBlockStmt(Block stmt);
         T VisitExpressionStmt(Expression stmt);
         T VisitVarStmt(Var stmt);
         T VisitPrintStmt(Print stmt);
+    }
+
+    public record Block(List<Stmt> Statements) : Stmt()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitBlockStmt(this);
     }
 
     public record Expression(Expr Expr) : Stmt()

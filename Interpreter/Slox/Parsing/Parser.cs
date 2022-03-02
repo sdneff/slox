@@ -60,7 +60,6 @@ public class Parser
         }
     }
 
-
     // varDecl     -> "var" IDENTIFIER ( "=" expression )? ";" ;
     private Stmt VarDeclaration()
     {
@@ -76,10 +75,11 @@ public class Parser
     }
 
 
-    // statement   -> exprStmt | printStmt ;
+    // statement   -> exprStmt | printStmt | block ;
     private Stmt Statement()
     {
         if (Match(Print)) return PrintStatement();
+        if (Match(LeftBrace)) return new Stmt.Block(Block().ToList());
 
         return ExpressionStatement();
     }
@@ -98,6 +98,17 @@ public class Parser
         var expr = Expression();
         Consume(Semicolon, "Expect ';' after value.");
         return new Stmt.Print(expr);
+    }
+
+    // block       -> "{" declaration* "}" ;
+    private IEnumerable<Stmt> Block()
+    {
+        while (!Check(RightBrace) && !IsAtEnd)
+        {
+            var decl = Declaration();
+            if (decl != null) yield return decl;
+        }
+        Consume(RightBrace, "Expect '}' after block.");
     }
 
     // expression  -> assignment ;

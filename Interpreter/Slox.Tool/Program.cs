@@ -30,6 +30,7 @@ class Program
 
         await AstGenerator.DefineAst(dir, "Stmt", new List<string>
         {
+            "Block      : List<Stmt> Statements",
             "Expression : Expr Expr",
             "Var        : Token Name, Expr? Initializer",
             "Print      : Expr Expr"

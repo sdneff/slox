@@ -5,6 +5,8 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
     public string Print(Stmt stmt) => stmt.Accept(this);
     public string Print(Expr expr) => expr.Accept(this);
 
+    public string VisitBlockStmt(Stmt.Block stmt) => Lines(stmt.Statements.Select(Print).Prepend("{").Append("}"));
+
     public string VisitVarStmt(Stmt.Var stmt) => stmt.Initializer ==  null
         ? Parenthesize("declare " + stmt.Name.Lexeme)
         : Parenthesize("let " + stmt.Name.Lexeme, stmt.Initializer);
@@ -23,6 +25,8 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
 
     public string VisitUnaryExpr(Expr.Unary expr) => Parenthesize(expr.Operator.Lexeme, expr.Right);
 
+    public string VisitVariableExpr(Expr.Variable expr) => expr.Name.ToString();
+
     private string Parenthesize(string name, params Expr[] exprs)
     {
         var eVals = exprs.Select(e => " " + e.Accept(this));
@@ -30,5 +34,8 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
         return $"({name}{string.Concat(eVals)})";
     }
 
-    public string VisitVariableExpr(Expr.Variable expr) => expr.Name.ToString();
+    private string Lines(IEnumerable<string> lines)
+    {
+        return string.Join(Environment.NewLine, lines);
+    }
 }

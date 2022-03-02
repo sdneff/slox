@@ -7,7 +7,7 @@ namespace Slox.Evaluation;
 
 public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 {
-    public Environment Environment { get; } = new();
+    public Environment Environment { get; private set; } = new();
 
     public void Interpret(IEnumerable<Stmt> statements)
     {
@@ -35,6 +35,13 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         {
             Slox.Error.ReportError(err);
         }
+    }
+
+    public Unit VisitBlockStmt(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Environment(Environment));
+
+        return unit;
     }
 
     public Unit VisitVarStmt(Stmt.Var stmt)
@@ -120,6 +127,23 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     public object? VisitVariableExpr(Expr.Variable expr) => Environment.Get(expr.Name);
 
-    private void Execute(Stmt stmt) => stmt.Accept(this);
     private object? Evaluate(Expr expr) => expr.Accept(this);
+    private void Execute(Stmt stmt) => stmt.Accept(this);
+    private void ExecuteBlock(IEnumerable<Stmt> statements, Environment environment)
+    {
+        var outer = Environment;
+        try
+        {
+            Environment = environment;
+
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            Environment = outer;
+        }
+    }
 }
