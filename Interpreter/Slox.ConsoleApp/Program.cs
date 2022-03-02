@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Slox.ConsoleApp.Commands;
+﻿using Slox.ConsoleApp.Commands;
+using Slox.ConsoleApp.Interactive;
 using Slox.ConsoleApp.Reporting;
 using Slox.Evaluation;
 using Slox.Parsing;
@@ -15,7 +15,12 @@ class Program
         {
             Console.WriteLine("Usage: slox [script]");
         }
-        else if (args.Length == 1)
+        
+        // set up environment
+        Slox.Error = new SimpleErrorReporter();
+        Slox.Out = new SimpleOutputReporter();
+
+        if (args.Length == 1)
         {
             RunFile(args[0]);
         }
@@ -27,54 +32,30 @@ class Program
 
     private static void RunFile(string path)
     {
+        var interpreter = new Interpreter();
+
         var source = File.ReadAllText(path);
-        Run(source);
+        InterpretSource(source, interpreter);
     }
 
     private static void RunPrompt()
     {
-        Console.WriteLine("slox interactive:");
-        Console.WriteLine();
+        var interpreter = new Interpreter();
 
-        var sb = new StringBuilder();
-        var multiline = false;
-
-        while (true)
-        {
-            Console.Write(multiline ? "  " : "> ");
-            var line = Console.ReadLine();
-            if (line == null || CommandReader.IsQuitCommand(line))
-            {
-                break;
+        Repl.Run(source => {
+            if (CommandReader.IsQuitCommand(source)) {
+                return false;
+            } else if (CommandReader.HandleInput(source, interpreter.Environment)) {
+                return true;
+            } else {
+                InterpretSource(source, interpreter);
+                return true;
             }
-            else if (line.EndsWith(@"\"))
-            {
-                multiline = true;
-                sb.AppendLine(line.Substring(0, line.Length - 1));
-            }
-            else
-            {
-                sb.AppendLine(line);
-                Run(sb.ToString(), true);
-                sb.Clear();
-            }
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("bye!");
+        });
     }
 
-    private static void Run(string source, bool enableCommands = false)
+    private static void InterpretSource(string source, Interpreter interpreter)
     {
-        // set up environment
-        Slox.Error = new SimpleErrorReporter();
-        Slox.Out = new SimpleOutputReporter();
-
-        if (enableCommands && CommandReader.HandleInput(source))
-        {
-            return;
-        }
-
         try
         {
             var scanner = new Scanner(source);
@@ -83,7 +64,6 @@ class Program
             var parser = new Parser(tokens);
             var statements = parser.Parse();
 
-            var interpreter = new Interpreter();
             interpreter.Interpret(statements);
         }
         catch (ParseError)

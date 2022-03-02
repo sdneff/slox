@@ -1,3 +1,5 @@
+using Environment = Slox.Evaluation.Environment;
+
 namespace Slox.ConsoleApp.Commands;
 
 public static class CommandReader
@@ -5,10 +7,15 @@ public static class CommandReader
     public static bool IsQuitCommand(string sourceIn)
     {
         var (cmd, _) = ParseCommand(sourceIn);
-        return cmd == "quit";
+        return cmd switch
+        {
+            "quit" => true,
+            "q" => true,
+            _ => false
+        };
     }
 
-    public static bool HandleInput(string sourceIn)
+    public static bool HandleInput(string sourceIn, Environment environment)
     {
         var (cmd, sourceOut) = ParseCommand(sourceIn);
         if (cmd == null) return false;
@@ -20,10 +27,11 @@ public static class CommandReader
             "parse-s" => new ParseTreeCommand(ParseTreeCommand.Type.Statement),
             "parse" => new ParseTreeCommand(),
             "eval"  => new EvaluateExpressionCommand(),
+            "env" => new EnvironmentCommand(),
             _ => new UnknownCommand(cmd)
         };
 
-        command.Run(sourceOut);
+        command.Run(sourceOut, environment);
         return true;
     }
 

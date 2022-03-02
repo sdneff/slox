@@ -12,21 +12,21 @@ public static class Values
 
     public static string Stringify(object? obj, bool quoteStrings = false)
     {
-        if (obj is null) return "nil";
-
-        var s = obj.ToString()!;
+        var s = obj?.ToString()!;
         
-        if (obj is double && s.EndsWith(".0"))
+        switch (obj)
         {
-            return s.Substring(0, s.Length - 2);
+            case null:
+                return "nil";
+            case double when s.EndsWith(".0"):
+                return s.Substring(0, s.Length - 2);
+            case bool:
+                return s.ToLowerInvariant();
+            case string when quoteStrings:
+                return @$"""{s}""";
+            default:
+                return s;
         }
-
-        if (quoteStrings && obj is string)
-        {
-            s = @$"""{s}""";
-        }
-
-        return s;
     }
 
     public static readonly Unit unit = Unit.Unit;
