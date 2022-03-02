@@ -14,7 +14,7 @@ public class EnvironmentCommand : ICommand
             ? environment.DefinedVariables.Select(s => s.Length).Max()
             : 0;
 
-        Console.WriteLine($"Current environment: variable count={count}.");
+        Console.WriteLine($"Current environment (depth={environment.Depth}): variable count={count}.");
         foreach (var @var in environment.DefinedVariables.OrderBy(s => s))
         {
             var value = Stringify(environment.GetValue(@var));
