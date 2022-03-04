@@ -1,5 +1,5 @@
 # slox
-Crafting Interpreters: compilers/interpreters for Lox language
+Crafting Interpreters: compilers/interpreters for the Lox language
 
 Following along with https://craftinginterpreters.com/ book.
 
