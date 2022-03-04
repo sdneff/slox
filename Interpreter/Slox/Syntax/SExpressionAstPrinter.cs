@@ -13,6 +13,10 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
  
     public string VisitExpressionStmt(Stmt.Expression stmt) => Print(stmt.Expr);
 
+    public string VisitIfStmt(Stmt.If stmt) => stmt.ElseBranch is null
+        ? Parenthesize("if", Print(stmt.ThenBranch))
+        : Parenthesize("if", Print(stmt.ThenBranch), Print(stmt.ElseBranch));
+
     public string VisitPrintStmt(Stmt.Print stmt) => Parenthesize("print", stmt.Expr);
 
     public string VisitAssignExpr(Expr.Assign expr) => Parenthesize("set " + expr.Name.Lexeme, expr.Value);
@@ -29,10 +33,13 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
 
     private string Parenthesize(string name, params Expr[] exprs)
     {
-        var eVals = exprs.Select(e => " " + e.Accept(this));
+        var eVals = exprs.Select(e => e.Accept(this));
 
-        return $"({name}{string.Concat(eVals)})";
+        return Parenthesize(eVals.Prepend(name));
     }
+
+    private string Parenthesize(IEnumerable<string> vals) => $"({string.Join(" ", vals)})";
+    private string Parenthesize(params string[] vals) => Parenthesize(vals.AsEnumerable());
 
     private string Lines(IEnumerable<string> lines)
     {

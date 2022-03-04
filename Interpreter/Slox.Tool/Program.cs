@@ -32,6 +32,7 @@ class Program
         {
             "Block      : List<Stmt> Statements",
             "Expression : Expr Expr",
+            "If         : Expr Condition, Stmt ThenBranch, Stmt? ElseBranch",
             "Var        : Token Name, Expr? Initializer",
             "Print      : Expr Expr"
         });

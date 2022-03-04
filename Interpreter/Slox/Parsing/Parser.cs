@@ -75,9 +75,10 @@ public class Parser
     }
 
 
-    // statement   -> exprStmt | printStmt | block ;
+    // statement   -> exprStmt | ifStmt | printStmt | block ;
     private Stmt Statement()
     {
+        if (Match(If)) return IfStatement();
         if (Match(Print)) return PrintStatement();
         if (Match(LeftBrace)) return new Stmt.Block(Block().ToList());
 
@@ -90,6 +91,17 @@ public class Parser
         var expr = Expression();
         Consume(Semicolon, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    private Stmt IfStatement()
+    {
+        Consume(LeftParen, "Expect '(' after if.");
+        var condition = Expression();
+        Consume(RightParen, "Expect ')' after if condition.");
+
+        var thenBranch = Statement();
+        var elseBranch = Match(Else) ? Statement() : null as Stmt;
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     // printStmt   -> "print" expression ";" ;

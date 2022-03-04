@@ -61,6 +61,16 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         return unit;
     }
 
+    public Unit VisitIfStmt(Stmt.If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition))) {
+            Execute(stmt.ThenBranch);
+        } else if (stmt.ElseBranch != null) {
+            Execute(stmt.ElseBranch);
+        }
+        return unit;
+    }
+
     public Unit VisitPrintStmt(Stmt.Print stmt)
     {
         var value = Evaluate(stmt.Expr);
