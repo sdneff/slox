@@ -35,7 +35,8 @@ class Program
             "Expression : Expr Expr",
             "If         : Expr Condition, Stmt ThenBranch, Stmt? ElseBranch",
             "Var        : Token Name, Expr? Initializer",
-            "Print      : Expr Expr"
+            "Print      : Expr Expr",
+            "While      : Expr Condition, Stmt Body"
         });
 
         Console.WriteLine($"AST code generated and written to: {dir.FullName}.");

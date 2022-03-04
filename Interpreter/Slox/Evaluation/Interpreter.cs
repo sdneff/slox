@@ -78,6 +78,14 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         return unit;
     }
 
+    public Unit VisitWhileStmt(Stmt.While stmt)
+    {
+        while (IsTruthy(Evaluate(stmt.Condition))) {
+            Execute(stmt.Body);
+        }
+        return unit;
+    }
+
     public object? VisitAssignExpr(Expr.Assign expr)
     {
         var value = Evaluate(expr.Value);

@@ -75,11 +75,12 @@ public class Parser
     }
 
 
-    // statement   -> exprStmt | ifStmt | printStmt | block ;
+    // statement   -> exprStmt | ifStmt | printStmt | whileStmt | block ;
     private Stmt Statement()
     {
         if (Match(If)) return IfStatement();
         if (Match(Print)) return PrintStatement();
+        if (Match(While)) return PrintStatement();
         if (Match(LeftBrace)) return new Stmt.Block(Block().ToList());
 
         return ExpressionStatement();
@@ -110,6 +111,17 @@ public class Parser
         var expr = Expression();
         Consume(Semicolon, "Expect ';' after value.");
         return new Stmt.Print(expr);
+    }
+
+    // whileStmt   -> "while" "(" expression ")" body ;
+    private Stmt WhileStatement()
+    {
+        Consume(LeftParen, "Expect '(' after while.");
+        var condition = Expression();
+        Consume(RightParen, "Expect ')' after while condition.");
+        var body = Statement();
+
+        return new Stmt.While(condition, body);
     }
 
     // block       -> "{" declaration* "}" ;

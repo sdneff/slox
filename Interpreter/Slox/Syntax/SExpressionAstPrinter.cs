@@ -14,10 +14,12 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
     public string VisitExpressionStmt(Stmt.Expression stmt) => Print(stmt.Expr);
 
     public string VisitIfStmt(Stmt.If stmt) => stmt.ElseBranch is null
-        ? Parenthesize("if", Print(stmt.ThenBranch))
-        : Parenthesize("if", Print(stmt.ThenBranch), Print(stmt.ElseBranch));
+        ? Parenthesize("if", Print(stmt.Condition), Print(stmt.ThenBranch))
+        : Parenthesize("if", Print(stmt.Condition), Print(stmt.ThenBranch), Print(stmt.ElseBranch));
 
     public string VisitPrintStmt(Stmt.Print stmt) => Parenthesize("print", stmt.Expr);
+
+    public string VisitWhileStmt(Stmt.While stmt) => Parenthesize("while", Print(stmt.Condition), Print(stmt.Body));
 
     public string VisitAssignExpr(Expr.Assign expr) => Parenthesize("set " + expr.Name.Lexeme, expr.Value);
 

@@ -17,6 +17,7 @@ public abstract record Stmt
         T VisitIfStmt(If stmt);
         T VisitVarStmt(Var stmt);
         T VisitPrintStmt(Print stmt);
+        T VisitWhileStmt(While stmt);
     }
 
     public record Block(List<Stmt> Statements) : Stmt()
@@ -42,6 +43,11 @@ public abstract record Stmt
     public record Print(Expr Expr) : Stmt()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitPrintStmt(this);
+    }
+
+    public record While(Expr Condition, Stmt Body) : Stmt()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitWhileStmt(this);
     }
 
 }
