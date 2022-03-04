@@ -16,6 +16,7 @@ public abstract record Expr
         T VisitBinaryExpr(Binary expr);
         T VisitGroupingExpr(Grouping expr);
         T VisitLiteralExpr(Literal expr);
+        T VisitLogicalExpr(Logical expr);
         T VisitVariableExpr(Variable expr);
         T VisitUnaryExpr(Unary expr);
     }
@@ -38,6 +39,11 @@ public abstract record Expr
     public record Literal(object? Value) : Expr()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitLiteralExpr(this);
+    }
+
+    public record Logical(Expr Left, Token Operator, Expr Right) : Expr()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitLogicalExpr(this);
     }
 
     public record Variable(Token Name) : Expr()

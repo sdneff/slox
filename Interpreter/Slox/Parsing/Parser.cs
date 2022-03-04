@@ -128,12 +128,12 @@ public class Parser
     
     // assignment  -> IDENTIFIER "=" assignment | equality ;
     private Expr Assignment() {
-        var expr = Equality();
+        var expr = Or();
 
         if (Match(Equal))
         {
             var equals = PreviousToken;
-            var value = Equality();
+            var value = Or();
 
             if (expr is Expr.Variable @var)
             {
@@ -146,6 +146,12 @@ public class Parser
 
         return expr;
     }
+
+    // logic_or    -> logic_and ( "or" logic_and )* ;
+    private Expr Or() => ParseLogical(And, TokenType.Or);
+
+    // logic_and   -> equality ( "and" equality )* ;
+    private Expr And() => ParseLogical(Equality, TokenType.And);
 
     // equality    -> comparison ( ( "!=" | "==" ) comparison )* ;
     private Expr Equality() => ParseBinary(Comparison, BangEqual, EqualEqual);
@@ -193,13 +199,20 @@ public class Parser
     }
 
     private Expr ParseBinary(Func<Expr> operand, params TokenType[] operators)
+        => ParseBinaryImpl(operand, (l, op, r) => new Expr.Binary(l, op, r), operators);
+
+    private Expr ParseLogical(Func<Expr> operand, params TokenType[] operators)
+        => ParseBinaryImpl(operand, (l, op, r) => new Expr.Logical(l, op, r), operators);
+
+    private Expr ParseBinaryImpl<T>(Func<Expr> operand, Func<Expr, Token, Expr, T> factory, params TokenType[] operators)
+        where T : Expr 
     {
         var expr = operand();
         while (Match(operators))
         {
             var @operator = PreviousToken;
             var right = operand();
-            expr = new Expr.Binary(expr, @operator, right);
+            expr = factory(expr, @operator, right);
         }
 
         return expr;

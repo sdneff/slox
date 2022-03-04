@@ -27,6 +27,8 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
 
     public string VisitLiteralExpr(Expr.Literal expr) => expr.Value?.ToString() ?? "nil";
 
+    public string VisitLogicalExpr(Expr.Logical expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
+
     public string VisitUnaryExpr(Expr.Unary expr) => Parenthesize(expr.Operator.Lexeme, expr.Right);
 
     public string VisitVariableExpr(Expr.Variable expr) => expr.Name.ToString();

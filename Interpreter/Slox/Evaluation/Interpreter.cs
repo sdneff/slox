@@ -119,6 +119,18 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     public object? VisitLiteralExpr(Expr.Literal expr) => expr.Value;
 
+    public object? VisitLogicalExpr(Expr.Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+
+        return expr.Operator.Type switch
+        {
+            Or when IsTruthy(left) => left,
+            And when !IsTruthy(left) => left,
+            _ => Evaluate(expr.Right)
+        };
+    }
+
     public object? VisitUnaryExpr(Expr.Unary expr)
     {
         var right = Evaluate(expr.Right);

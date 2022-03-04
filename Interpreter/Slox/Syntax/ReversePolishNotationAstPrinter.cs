@@ -17,6 +17,8 @@ public class ReversePolishNotationAstPrinter : IAstPrinter
             yield return expr.Value?.ToString() ?? "nil";
         }
 
+        public IEnumerable<string> VisitLogicalExpr(Expr.Logical expr) => AsStack(expr.Operator.Lexeme, expr.Left, expr.Right);
+
         public IEnumerable<string> VisitUnaryExpr(Expr.Unary expr) => AsStack(expr.Operator.Lexeme, expr.Right);
 
         public IEnumerable<string> VisitVariableExpr(Expr.Variable expr)
