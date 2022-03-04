@@ -75,9 +75,10 @@ public class Parser
     }
 
 
-    // statement   -> exprStmt | ifStmt | printStmt | whileStmt | block ;
+    // statement   -> exprStmt | forStmt | ifStmt | printStmt | whileStmt | block ;
     private Stmt Statement()
     {
+        if (Match(For)) return ForStatement();
         if (Match(If)) return IfStatement();
         if (Match(Print)) return PrintStatement();
         if (Match(While)) return PrintStatement();
@@ -94,9 +95,60 @@ public class Parser
         return new Stmt.Expression(expr);
     }
 
+    // forStmt     -> "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement ;
+    private Stmt ForStatement()
+    {
+        Consume(LeftParen, "Expect '(' after 'for'.");
+
+        var initializer = Match(Semicolon)
+            ? null as Stmt
+            : Match(Var)
+                ? VarDeclaration()
+                : ExpressionStatement();
+
+        var condition = Check(Semicolon)
+            ? null as Expr
+            : Expression();
+
+        Consume(Semicolon, "Expect ';' after loop condition.");
+
+        var increment = Check(RightParen)
+            ? null as Expr
+            : Expression();
+
+        Consume(RightParen, "Expect ')' after for clauses.");
+
+        var body = Statement();
+
+        // for (initializer condition increment) { body }
+        // -- DESUGAR TO --
+        // {
+        //     initializer;
+        //     while (condition) {
+        //         body
+        //         increment
+        //     }
+        // }
+
+        if (increment != null)
+        {
+            body = new Stmt.Block(new List<Stmt> { body, new Stmt.Expression(increment) });
+        }
+
+        body = new Stmt.While(condition ?? new Expr.Literal(true), body);
+
+        if (initializer != null)
+        {
+            body = new Stmt.Block(new List<Stmt> { initializer, body });
+        }
+
+        return body;
+    }
+
+    // ifStmt      -> "if" "(" expression ")" statement ( "else" statement )? ;
     private Stmt IfStatement()
     {
-        Consume(LeftParen, "Expect '(' after if.");
+        Consume(LeftParen, "Expect '(' after 'if'.");
         var condition = Expression();
         Consume(RightParen, "Expect ')' after if condition.");
 
@@ -116,7 +168,7 @@ public class Parser
     // whileStmt   -> "while" "(" expression ")" body ;
     private Stmt WhileStatement()
     {
-        Consume(LeftParen, "Expect '(' after while.");
+        Consume(LeftParen, "Expect '(' after 'while'.");
         var condition = Expression();
         Consume(RightParen, "Expect ')' after while condition.");
         var body = Statement();
