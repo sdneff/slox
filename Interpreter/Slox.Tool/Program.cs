@@ -22,6 +22,7 @@ class Program
         {
             "Assign   : Token Name, Expr Value",
             "Binary   : Expr Left, Token Operator, Expr Right",
+            "Call     : Expr Callee, Token Paren, List<Expr> Arguments",
             "Grouping : Expr Expression",
             "Literal  : object? Value",
             "Logical  : Expr Left, Token Operator, Expr Right",

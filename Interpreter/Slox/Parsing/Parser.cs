@@ -229,7 +229,7 @@ public class Parser
     // factor      -> unary ( ( "/" | "*" ) unary )* ;
     private Expr Factor() => ParseBinary(Unary, Slash, Star);
 
-    // unary       -> ( "!" | "-" ) unary | primary ;
+    // unary       -> ( "!" | "-" ) unary | call ;
     private Expr Unary()
     {
         if (Match(Bang, Minus)) {
@@ -238,7 +238,44 @@ public class Parser
             return new Expr.Unary(@operator, right);
         }
 
-        return Primary();
+        return Call();
+    }
+
+    // call        -> primary ( "(" arguments? ")" )* ;
+    // arguments   -> expression ( "," expression )* ;
+    private Expr Call()
+    {
+        var expr = Primary();
+
+        while (true)
+        {
+            if (Match(LeftParen))
+            {
+                var arguments = new List<Expr>();
+                if (!Check(RightParen))
+                {
+                    do
+                    {
+                        if (arguments.Count > 255)
+                        {
+                            Slox.Error.ReportError(CurrentToken, "Can't have more than 255 arguments.");
+                        }
+                        arguments.Add(Expression());
+                    }
+                    while (Match(Comma));
+                }
+
+                var paren = Consume(RightParen, "Expect ')' after arguments.");
+
+                expr = new Expr.Call(expr, paren, arguments);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return expr;
     }
 
     // primary     -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;

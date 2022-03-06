@@ -10,6 +10,8 @@ public class ReversePolishNotationAstPrinter : IAstPrinter
 
         public IEnumerable<string> VisitBinaryExpr(Expr.Binary expr) => AsStack(expr.Operator.Lexeme, expr.Left, expr.Right);
 
+        public IEnumerable<string> VisitCallExpr(Expr.Call expr) => AsStack(string.Concat(expr.Callee.Accept(this)), expr.Arguments.ToArray());
+
         public IEnumerable<string> VisitGroupingExpr(Expr.Grouping expr) => AsStack("group", expr.Expression);
 
         public IEnumerable<string> VisitLiteralExpr(Expr.Literal expr)

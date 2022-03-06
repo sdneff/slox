@@ -7,7 +7,14 @@ namespace Slox.Evaluation;
 
 public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 {
-    public Environment Environment { get; private set; } = new();
+    private readonly Environment _globals = new();
+    public Environment Environment { get; private set; }
+
+    public Interpreter()
+    {
+        Environment = _globals;
+        NativeFunctions.AddTo(_globals);
+    }
 
     public void Interpret(IEnumerable<Stmt> statements)
     {
@@ -120,6 +127,28 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
                     LessEqual => l <= r,
                     _ => null as object
                 };
+        }
+    }
+
+    public object? VisitCallExpr(Expr.Call expr)
+    {
+        var callee = Evaluate(expr.Callee);
+
+        if (callee is ICallable function)
+        {
+            var arguments = expr.Arguments.Select(Evaluate).ToList();
+
+            if (arguments.Count != function.Arity)
+            {
+                throw new RuntimeError(expr.Paren,
+                    $"Expected {function.Arity} arguments but got {arguments.Count}.");
+            }
+
+            return function.Call(this, arguments);
+        }
+        else
+        {
+            throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
         }
     }
 

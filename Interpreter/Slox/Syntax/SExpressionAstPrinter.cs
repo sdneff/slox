@@ -25,6 +25,8 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
 
     public string VisitBinaryExpr(Expr.Binary expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     
+    public string VisitCallExpr(Expr.Call expr) => Parenthesize(expr.Callee.Accept(this), expr.Arguments.ToArray());
+
     public string VisitGroupingExpr(Expr.Grouping expr) => Parenthesize("group", expr.Expression);
 
     public string VisitLiteralExpr(Expr.Literal expr) => expr.Value?.ToString() ?? "nil";
