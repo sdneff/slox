@@ -7,10 +7,6 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
 
     public string VisitBlockStmt(Stmt.Block stmt) => Lines(stmt.Statements.Select(Print).Prepend("{").Append("}"));
 
-    public string VisitVarStmt(Stmt.Var stmt) => stmt.Initializer ==  null
-        ? Parenthesize("declare " + stmt.Name.Lexeme)
-        : Parenthesize("let " + stmt.Name.Lexeme, stmt.Initializer);
- 
     public string VisitExpressionStmt(Stmt.Expression stmt) => Print(stmt.Expr);
 
     public string VisitFunctionStmt(Stmt.Function fun) => Parenthesize("define",
@@ -22,6 +18,12 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
         : Parenthesize("if", Print(stmt.Condition), Print(stmt.ThenBranch), Print(stmt.ElseBranch));
 
     public string VisitPrintStmt(Stmt.Print stmt) => Parenthesize("print", stmt.Expr);
+
+    public string VisitVarStmt(Stmt.Var stmt) => stmt.Initializer ==  null
+        ? Parenthesize("declare " + stmt.Name.Lexeme)
+        : Parenthesize("let " + stmt.Name.Lexeme, stmt.Initializer);
+
+    public string VisitReturnStmt(Stmt.Return stmt) => Parenthesize("return", stmt.Value);
 
     public string VisitWhileStmt(Stmt.While stmt) => Parenthesize("while", Print(stmt.Condition), Print(stmt.Body));
 

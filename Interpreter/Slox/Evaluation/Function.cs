@@ -22,7 +22,14 @@ public class Function : ICallable
             environment.Define(token.Lexeme, val);
         }
 
-        interpreter.ExecuteBlock(_declaration.Body, environment);
+        try
+        {
+            interpreter.ExecuteBlock(_declaration.Body, environment);
+        }
+        catch (Return returnVal)
+        {
+            return returnVal.Value;
+        }
 
         return null;
     }

@@ -16,8 +16,9 @@ public abstract record Stmt
         T VisitExpressionStmt(Expression stmt);
         T VisitFunctionStmt(Function stmt);
         T VisitIfStmt(If stmt);
-        T VisitVarStmt(Var stmt);
         T VisitPrintStmt(Print stmt);
+        T VisitReturnStmt(Return stmt);
+        T VisitVarStmt(Var stmt);
         T VisitWhileStmt(While stmt);
     }
 
@@ -41,14 +42,19 @@ public abstract record Stmt
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitIfStmt(this);
     }
 
-    public record Var(Token Name, Expr? Initializer) : Stmt()
-    {
-        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitVarStmt(this);
-    }
-
     public record Print(Expr Expr) : Stmt()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitPrintStmt(this);
+    }
+
+    public record Return(Token Keyword, Expr Value) : Stmt()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitReturnStmt(this);
+    }
+
+    public record Var(Token Name, Expr? Initializer) : Stmt()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitVarStmt(this);
     }
 
     public record While(Expr Condition, Stmt Body) : Stmt()

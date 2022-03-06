@@ -45,7 +45,7 @@ public class Parser
         }
     }
 
-    // declaration -> varDecl | statement ;
+    // declaration -> funDecl | varDecl | statement ;
     private Stmt? Declaration()
     {
         try
@@ -61,6 +61,9 @@ public class Parser
         }
     }
 
+    // funDecl     -> "fun" function ;
+    // function    -> IDENTIFIER "(" parameters? ")" block ;
+    // parameters  -> IDENTIFIER ( "," IDENTIFIER )* ;
     private Stmt Function(string kind)
     {
         var name = Consume(Identifier, $"Expect {kind} name.");
@@ -99,14 +102,14 @@ public class Parser
         return new Stmt.Var(name, initializer);
     }
 
-
-    // statement   -> exprStmt | forStmt | ifStmt | printStmt | whileStmt | block ;
+    // statement   -> exprStmt | forStmt | ifStmt | printStmt | returnStmt | whileStmt | block ;
     private Stmt Statement()
     {
         if (Match(For)) return ForStatement();
         if (Match(If)) return IfStatement();
         if (Match(Print)) return PrintStatement();
-        if (Match(While)) return PrintStatement();
+        if (Match(Return)) return ReturnStatement();
+        if (Match(While)) return WhileStatement();
         if (Match(LeftBrace)) return new Stmt.Block(Block().ToList());
 
         return ExpressionStatement();
@@ -188,6 +191,18 @@ public class Parser
         var expr = Expression();
         Consume(Semicolon, "Expect ';' after value.");
         return new Stmt.Print(expr);
+    }
+
+    // returnStmt  -> "return" expression? ";" ;
+    private Stmt ReturnStatement()
+    {
+        var keyword = PreviousToken;
+        var value = Check(Semicolon)
+            ? null as Expr
+            : Expression();
+
+        Consume(Semicolon, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
     }
 
     // whileStmt   -> "while" "(" expression ")" body ;

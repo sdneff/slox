@@ -51,17 +51,6 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         return unit;
     }
 
-    public Unit VisitVarStmt(Stmt.Var stmt)
-    {
-        Environment.Define(
-            stmt.Name.Lexeme,
-            stmt.Initializer != null
-                ? Evaluate(stmt.Initializer)
-                : null as object);
-
-        return unit;
-    }
-
     public Unit VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt.Expr);
@@ -88,6 +77,23 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
     {
         var value = Evaluate(stmt.Expr);
         Slox.Out.Print(Stringify(value));
+        return unit;
+    }
+
+    public Unit VisitReturnStmt(Stmt.Return stmt)
+    {
+        var val = stmt.Value == null ? null : Evaluate(stmt.Value);
+        throw new Return(val);
+    }
+
+    public Unit VisitVarStmt(Stmt.Var stmt)
+    {
+        Environment.Define(
+            stmt.Name.Lexeme,
+            stmt.Initializer != null
+                ? Evaluate(stmt.Initializer)
+                : null as object);
+
         return unit;
     }
 
