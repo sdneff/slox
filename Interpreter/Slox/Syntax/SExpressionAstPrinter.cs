@@ -13,6 +13,10 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
  
     public string VisitExpressionStmt(Stmt.Expression stmt) => Print(stmt.Expr);
 
+    public string VisitFunctionStmt(Stmt.Function fun) => Parenthesize("define",
+        Parenthesize(fun.Params.Select(p => p.Lexeme).Prepend(fun.Name.Lexeme)),
+        Parenthesize(fun.Body.Select(Print)));
+
     public string VisitIfStmt(Stmt.If stmt) => stmt.ElseBranch is null
         ? Parenthesize("if", Print(stmt.Condition), Print(stmt.ThenBranch))
         : Parenthesize("if", Print(stmt.Condition), Print(stmt.ThenBranch), Print(stmt.ElseBranch));

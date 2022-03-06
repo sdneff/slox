@@ -50,6 +50,7 @@ public class Parser
     {
         try
         {
+            if (Match(Fun)) return Function("function");
             if (Match(Var)) return VarDeclaration();
             return Statement();
         }
@@ -60,10 +61,34 @@ public class Parser
         }
     }
 
+    private Stmt Function(string kind)
+    {
+        var name = Consume(Identifier, $"Expect {kind} name.");
+        Consume(LeftParen, $"Expect '(' after {kind} name.");
+        var @params = new List<Token>();
+        if (!Check(RightParen))
+        {
+            do
+            {
+                if (@params.Count > 255)
+                {
+                    Slox.Error.ReportError(CurrentToken, "Can't have more than 255 parameters.");
+                }
+                @params.Add(Consume(Identifier, "Expect parameter name."));
+            }
+            while (Match(Comma));
+        }
+
+        Consume(RightParen, "Expect ')' after parameters.");
+        Consume(LeftBrace, $"Expect '{{' before {kind} body.");
+        var body = Block().ToList();
+        return new Stmt.Function(name, @params, body);
+    }
+
     // varDecl     -> "var" IDENTIFIER ( "=" expression )? ";" ;
     private Stmt VarDeclaration()
     {
-        var name = Consume(Identifier, "Expcet variable name.");
+        var name = Consume(Identifier, "Expect variable name.");
 
         Expr? initializer = null;
         if (Match(Equal))

@@ -14,6 +14,7 @@ public abstract record Stmt
     {
         T VisitBlockStmt(Block stmt);
         T VisitExpressionStmt(Expression stmt);
+        T VisitFunctionStmt(Function stmt);
         T VisitIfStmt(If stmt);
         T VisitVarStmt(Var stmt);
         T VisitPrintStmt(Print stmt);
@@ -28,6 +29,11 @@ public abstract record Stmt
     public record Expression(Expr Expr) : Stmt()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitExpressionStmt(this);
+    }
+
+    public record Function(Token Name, List<Token> Params, List<Stmt> Body) : Stmt()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitFunctionStmt(this);
     }
 
     public record If(Expr Condition, Stmt ThenBranch, Stmt? ElseBranch) : Stmt()

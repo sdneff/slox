@@ -7,13 +7,13 @@ namespace Slox.Evaluation;
 
 public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 {
-    private readonly Environment _globals = new();
+    public readonly Environment Globals = new();
     public Environment Environment { get; private set; }
 
     public Interpreter()
     {
-        Environment = _globals;
-        NativeFunctions.AddTo(_globals);
+        Environment = Globals;
+        NativeFunctions.AddTo(Globals);
     }
 
     public void Interpret(IEnumerable<Stmt> statements)
@@ -65,6 +65,12 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
     public Unit VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt.Expr);
+        return unit;
+    }
+
+    public Unit VisitFunctionStmt(Stmt.Function stmt)
+    {
+        Environment.Define(stmt.Name.Lexeme, new Function(stmt));
         return unit;
     }
 
@@ -186,9 +192,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     public object? VisitVariableExpr(Expr.Variable expr) => Environment.Get(expr.Name);
 
-    private object? Evaluate(Expr expr) => expr.Accept(this);
-    private void Execute(Stmt stmt) => stmt.Accept(this);
-    private void ExecuteBlock(IEnumerable<Stmt> statements, Environment environment)
+    public void ExecuteBlock(IEnumerable<Stmt> statements, Environment environment)
     {
         var outer = Environment;
         try
@@ -205,4 +209,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
             Environment = outer;
         }
     }
+
+    private object? Evaluate(Expr expr) => expr.Accept(this);
+    private void Execute(Stmt stmt) => stmt.Accept(this);
 }
