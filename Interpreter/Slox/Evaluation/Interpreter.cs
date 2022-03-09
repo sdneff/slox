@@ -59,7 +59,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     public Unit VisitFunctionStmt(Stmt.Function stmt)
     {
-        Environment.Define(stmt.Name.Lexeme, new Function(stmt));
+        Environment.Define(stmt.Name.Lexeme, new Function(stmt, Environment));
         return unit;
     }
 

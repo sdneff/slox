@@ -47,7 +47,7 @@ public abstract record Stmt
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitPrintStmt(this);
     }
 
-    public record Return(Token Keyword, Expr Value) : Stmt()
+    public record Return(Token Keyword, Expr? Value) : Stmt()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitReturnStmt(this);
     }

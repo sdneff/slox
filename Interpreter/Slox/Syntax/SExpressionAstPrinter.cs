@@ -23,7 +23,9 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
         ? Parenthesize("declare " + stmt.Name.Lexeme)
         : Parenthesize("let " + stmt.Name.Lexeme, stmt.Initializer);
 
-    public string VisitReturnStmt(Stmt.Return stmt) => Parenthesize("return", stmt.Value);
+    public string VisitReturnStmt(Stmt.Return stmt) => stmt.Value == null
+        ? Parenthesize("return")
+        : Parenthesize("return", stmt.Value);
 
     public string VisitWhileStmt(Stmt.While stmt) => Parenthesize("while", Print(stmt.Condition), Print(stmt.Body));
 
