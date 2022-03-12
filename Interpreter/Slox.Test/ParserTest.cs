@@ -145,19 +145,19 @@ public class ParserTest
         Assert.Single(stmt);
         Assert.IsType<Stmt.Function>(stmt[0]);
 
-        var varDecl = (Stmt.Function)stmt[0];
+        var funDecl = (Stmt.Function)stmt[0];
 
-        Assert.Equal("incr", varDecl.Name.Lexeme);
-        Assert.Single(varDecl.Params);
+        Assert.Equal("incr", funDecl.Name.Lexeme);
+        Assert.Single(funDecl.Func.Params);
 
-        var param = varDecl.Params[0];
+        var param = funDecl.Func.Params[0];
 
         Assert.Equal("x", param.Lexeme);
 
-        Assert.Single(varDecl.Body);
-        Assert.IsType<Stmt.Return>(varDecl.Body[0]);
+        Assert.Single(funDecl.Func.Body);
+        Assert.IsType<Stmt.Return>(funDecl.Func.Body[0]);
 
-        var @return = (Stmt.Return)varDecl.Body[0];
+        var @return = (Stmt.Return)funDecl.Func.Body[0];
 
         Assert.NotNull(@return.Value);
         Assert.IsType<Expr.Binary>(@return.Value);
@@ -173,5 +173,53 @@ public class ParserTest
 
         Assert.Equal("x", left.Name.Lexeme);
         Assert.Equal(1d, right.Value);
-    }    
+    }
+
+    [Fact]
+    public void TestAnonymousFunction()
+    {
+        var source = @"fun (x, y) {
+    return x + y;
+}";
+
+        var scanner = new Scanner(source);
+        var tokens = scanner.ScanTokens();
+
+        var parser = new Parser(tokens);
+
+        var expr = parser.ParseExpression();        
+
+        Assert.NotNull(expr);
+        Assert.IsType<Expr.Function>(expr);
+
+        var func = (Expr.Function)expr!;
+
+        Assert.Equal(2, func.Params.Count);
+
+        var param1 = func.Params[0];
+        var param2 = func.Params[1];
+
+        Assert.Equal("x", param1.Lexeme);
+        Assert.Equal("y", param2.Lexeme);
+
+        Assert.Single(func.Body);
+        Assert.IsType<Stmt.Return>(func.Body[0]);
+
+        var @return = (Stmt.Return)func.Body[0];
+
+        Assert.NotNull(@return.Value);
+        Assert.IsType<Expr.Binary>(@return.Value);
+
+        var add = (Expr.Binary)@return.Value!;
+
+        Assert.Equal(TokenType.Plus, add.Operator.Type);
+        Assert.IsType<Expr.Variable>(add.Left);
+        Assert.IsType<Expr.Variable>(add.Right);
+
+        var left = (Expr.Variable)add.Left;
+        var right = (Expr.Variable)add.Right;
+
+        Assert.Equal("x", left.Name.Lexeme);
+        Assert.Equal("y", right.Name.Lexeme);
+    }
 }

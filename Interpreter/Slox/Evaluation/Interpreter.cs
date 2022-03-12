@@ -59,7 +59,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     public Unit VisitFunctionStmt(Stmt.Function stmt)
     {
-        Environment.Define(stmt.Name.Lexeme, new Function(stmt, Environment));
+        Environment.Define(stmt.Name.Lexeme, new Function(stmt.Name.Lexeme, stmt.Func, Environment));
         return unit;
     }
 
@@ -137,7 +137,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
                     GreaterEqual => l >= r,
                     Less => l < r,
                     LessEqual => l <= r,
-                    _ => null as object
+                    _ => null
                 };
         }
     }
@@ -163,6 +163,8 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
             throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
         }
     }
+
+    public object? VisitFunctionExpr(Expr.Function expr) => new Function(null, expr, Environment);
 
     public object? VisitGroupingExpr(Expr.Grouping expr) => Evaluate(expr.Expression);
 

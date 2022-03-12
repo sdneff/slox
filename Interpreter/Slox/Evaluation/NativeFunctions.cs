@@ -7,11 +7,20 @@ public static class NativeFunctions
         globals.Define("clock", new Clock());
     }
 
-    private class Clock : ICallable
+    private abstract class NativeFunction : ICallable
     {
-        public int Arity => 0;
+        public abstract int Arity { get; }
+
+        public abstract object? Call(Interpreter interpreter, IList<object?> arguments);
+
+        public override string ToString() => "<native function>";
+    }
+
+    private class Clock : NativeFunction
+    {
+        public override int Arity => 0;
         
-        public object? Call(Interpreter interpreter, IList<object?> arguments)
+        public override object? Call(Interpreter interpreter, IList<object?> arguments)
         {
             return DateTimeOffset.Now.ToUnixTimeMilliseconds() / 1_000.0;
         }

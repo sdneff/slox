@@ -10,8 +10,8 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
     public string VisitExpressionStmt(Stmt.Expression stmt) => Print(stmt.Expr);
 
     public string VisitFunctionStmt(Stmt.Function fun) => Parenthesize("define",
-        Parenthesize(fun.Params.Select(p => p.Lexeme).Prepend(fun.Name.Lexeme)),
-        Parenthesize(fun.Body.Select(Print)));
+        Parenthesize(fun.Func.Params.Select(p => p.Lexeme).Prepend(fun.Name.Lexeme)),
+        Parenthesize(fun.Func.Body.Select(Print)));
 
     public string VisitIfStmt(Stmt.If stmt) => stmt.ElseBranch is null
         ? Parenthesize("if", Print(stmt.Condition), Print(stmt.ThenBranch))
@@ -34,6 +34,10 @@ public class SExpressionAstPrinter : Expr.IVisitor<string>, Stmt.IVisitor<string
     public string VisitBinaryExpr(Expr.Binary expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     
     public string VisitCallExpr(Expr.Call expr) => Parenthesize(expr.Callee.Accept(this), expr.Arguments.ToArray());
+
+    public string VisitFunctionExpr(Expr.Function expr) => Parenthesize("lambda",
+        Parenthesize(expr.Params.Select(p => p.Lexeme)),
+        Parenthesize(expr.Body.Select(Print)));
 
     public string VisitGroupingExpr(Expr.Grouping expr) => Parenthesize("group", expr.Expression);
 

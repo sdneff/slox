@@ -12,6 +12,13 @@ public class ReversePolishNotationAstPrinter : IAstPrinter
 
         public IEnumerable<string> VisitCallExpr(Expr.Call expr) => AsStack(string.Concat(expr.Callee.Accept(this)), expr.Arguments.ToArray());
 
+        public IEnumerable<string> VisitFunctionExpr(Expr.Function expr) => 
+            new [] { "(", "lambda" }
+                .Concat(expr.Params.Select(p => p.Lexeme))
+                .Append(")")
+                .Append("<body>")
+                .Append(")");
+
         public IEnumerable<string> VisitGroupingExpr(Expr.Grouping expr) => AsStack("group", expr.Expression);
 
         public IEnumerable<string> VisitLiteralExpr(Expr.Literal expr)

@@ -23,6 +23,7 @@ class Program
             "Assign   : Token Name, Expr Value",
             "Binary   : Expr Left, Token Operator, Expr Right",
             "Call     : Expr Callee, Token Paren, List<Expr> Arguments",
+            "Function : List<Token> Params, List<Stmt> Body",
             "Grouping : Expr Expression",
             "Literal  : object? Value",
             "Logical  : Expr Left, Token Operator, Expr Right",
@@ -34,7 +35,7 @@ class Program
         {
             "Block      : List<Stmt> Statements",
             "Expression : Expr Expr",
-            "Function   : Token Name, List<Token> Params, List<Stmt> Body",
+            "Function   : Token Name, Expr.Function Func",
             "If         : Expr Condition, Stmt ThenBranch, Stmt? ElseBranch",
             "Print      : Expr Expr",
             "Return     : Token Keyword, Expr? Value",

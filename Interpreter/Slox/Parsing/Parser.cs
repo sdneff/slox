@@ -12,6 +12,7 @@ public class Parser
 
     private bool IsAtEnd => CurrentToken.Type == Eof;
     private Token CurrentToken => _tokens[current];
+    private Token NextToken => _tokens[current + 1];
     private Token PreviousToken => _tokens[current - 1];
 
     public Parser(IEnumerable<Token> tokens)
@@ -50,7 +51,11 @@ public class Parser
     {
         try
         {
-            if (Match(Fun)) return Function("function");
+            if (Check(Fun) && CheckNext(Identifier))
+            {
+                Consume(Fun, "");
+                return Function("function");
+            }
             if (Match(Var)) return VarDeclaration();
             return Statement();
         }
@@ -67,25 +72,8 @@ public class Parser
     private Stmt Function(string kind)
     {
         var name = Consume(Identifier, $"Expect {kind} name.");
-        Consume(LeftParen, $"Expect '(' after {kind} name.");
-        var @params = new List<Token>();
-        if (!Check(RightParen))
-        {
-            do
-            {
-                if (@params.Count > 255)
-                {
-                    Slox.Error.ReportError(CurrentToken, "Can't have more than 255 parameters.");
-                }
-                @params.Add(Consume(Identifier, "Expect parameter name."));
-            }
-            while (Match(Comma));
-        }
-
-        Consume(RightParen, "Expect ')' after parameters.");
-        Consume(LeftBrace, $"Expect '{{' before {kind} body.");
-        var body = Block().ToList();
-        return new Stmt.Function(name, @params, body);
+        var func = ParseFunction(kind);
+        return new Stmt.Function(name, func);
     }
 
     // varDecl     -> "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -318,12 +306,13 @@ public class Parser
         return expr;
     }
 
-    // primary     -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;
+    // primary     -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | anon_func ;
     private Expr Primary()
     {
         if (Match(False)) return new Expr.Literal(false);
         if (Match(True)) return new Expr.Literal(true);
         if (Match(Nil)) return new Expr.Literal(null);
+        if (Match(Fun)) return ParseFunction("anonymous function");
 
         if (Match(Number, TokenType.String)) return new Expr.Literal(PreviousToken.Literal);
 
@@ -359,6 +348,29 @@ public class Parser
         return expr;
     }
 
+    private Expr.Function ParseFunction(string kind)
+    {
+        Consume(LeftParen, $"Expect '(' after {kind} name.");
+        var @params = new List<Token>();
+        if (!Check(RightParen))
+        {
+            do
+            {
+                if (@params.Count > 255)
+                {
+                    Slox.Error.ReportError(CurrentToken, "Can't have more than 255 parameters.");
+                }
+                @params.Add(Consume(Identifier, "Expect parameter name."));
+            }
+            while (Match(Comma));
+        }
+
+        Consume(RightParen, "Expect ')' after parameters.");
+        Consume(LeftBrace, $"Expect '{{' before {kind} body.");
+        var body = Block().ToList();
+        return new Expr.Function(@params, body);
+    }
+
     private bool Match(params TokenType[] types)
     {
         if (types.Any(Check))
@@ -370,6 +382,8 @@ public class Parser
     }
 
     private bool Check(TokenType type) => !IsAtEnd && CurrentToken.Type == type;
+
+    private bool CheckNext(TokenType type) => !IsAtEnd && NextToken.Type != Eof && NextToken.Type == type;
 
     private Token Advance() {
         if (!IsAtEnd) current++;

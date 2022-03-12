@@ -15,6 +15,7 @@ public abstract record Expr
         T VisitAssignExpr(Assign expr);
         T VisitBinaryExpr(Binary expr);
         T VisitCallExpr(Call expr);
+        T VisitFunctionExpr(Function expr);
         T VisitGroupingExpr(Grouping expr);
         T VisitLiteralExpr(Literal expr);
         T VisitLogicalExpr(Logical expr);
@@ -35,6 +36,11 @@ public abstract record Expr
     public record Call(Expr Callee, Token Paren, List<Expr> Arguments) : Expr()
     {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitCallExpr(this);
+    }
+
+    public record Function(List<Token> Params, List<Stmt> Body) : Expr()
+    {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitFunctionExpr(this);
     }
 
     public record Grouping(Expr Expression) : Expr()
