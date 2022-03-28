@@ -11,3 +11,5 @@ The "s" in slox stands for Scott (:wave:).
 * REPL:
     * commands (`:token`, `:parse`, `:quit`, etc.)
     * multiline support (end line with `\`)
+* language:
+    * anonymous functions

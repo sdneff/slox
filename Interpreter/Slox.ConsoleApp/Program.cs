@@ -64,15 +64,23 @@ class Program
             var parser = new Parser(tokens);
             var statements = parser.Parse();
 
+            var resolver = new Resolver(interpreter);
+            resolver.Resolve(statements);
+
             interpreter.Interpret(statements);
         }
         catch (ParseError)
         {
             Console.WriteLine("PARSE ERROR");
         }
+        catch (ResolutionError)
+        {
+            Console.WriteLine("RESOLUTION ERROR");
+        }
         catch (RuntimeError)
         {
             Console.WriteLine("RUNTIME ERROR");
         }
+        
     }
 }

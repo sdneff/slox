@@ -2,16 +2,23 @@ using Slox.Syntax;
 using static Slox.Scanning.TokenType;
 using static Slox.Evaluation.Values;
 using static Slox.Evaluation.RuntimeTypes;
+using Slox.Scanning;
+using Slox.Reporting;
 
 namespace Slox.Evaluation;
 
 public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 {
+    private readonly IOutputReporter _output;
+
+    private readonly Dictionary<Expr, int> _locals = new();
+
     public readonly Environment Globals = new();
     public Environment Environment { get; private set; }
 
-    public Interpreter()
+    public Interpreter(IOutputReporter? output = null)
     {
+        _output = output ?? Slox.Out;
         Environment = Globals;
         NativeFunctions.AddTo(Globals);
     }
@@ -36,12 +43,17 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         try
         {
             var value = Evaluate(expression);
-            Slox.Out.ReportResult(Stringify(value, true));
+            _output.ReportResult(Stringify(value, true));
         }
         catch (RuntimeError err)
         {
             Slox.Error.ReportError(err);
         }
+    }
+
+    public void Resolve(Expr expr, int depth)
+    {
+        _locals[expr] = depth;
     }
 
     public Unit VisitBlockStmt(Stmt.Block stmt)
@@ -76,7 +88,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
     public Unit VisitPrintStmt(Stmt.Print stmt)
     {
         var value = Evaluate(stmt.Expr);
-        Slox.Out.Print(Stringify(value));
+        _output.Print(Stringify(value));
         return unit;
     }
 
@@ -108,7 +120,16 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
     public object? VisitAssignExpr(Expr.Assign expr)
     {
         var value = Evaluate(expr.Value);
-        Environment.Assign(expr.Name, value);
+
+        if (_locals.TryGetValue(expr, out var distance))
+        {
+            Environment.AssignAt(distance, expr.Name, value);
+        }
+        else
+        {
+            Globals.Assign(expr.Name, value);
+        }
+
         return value;
     }
 
@@ -198,7 +219,7 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
         };
     }
 
-    public object? VisitVariableExpr(Expr.Variable expr) => Environment.Get(expr.Name);
+    public object? VisitVariableExpr(Expr.Variable expr) => LookupVariable(expr.Name, expr);
 
     public void ExecuteBlock(IEnumerable<Stmt> statements, Environment environment)
     {
@@ -220,4 +241,16 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<Unit>
 
     private object? Evaluate(Expr expr) => expr.Accept(this);
     private void Execute(Stmt stmt) => stmt.Accept(this);
+
+    private object? LookupVariable(Token name, Expr expr)
+    {
+        if (_locals.TryGetValue(expr, out var distance))
+        {
+            return Environment.GetAt(distance, name);
+        }
+        else
+        {
+            return Globals.Get(name);
+        }
+    }
 }

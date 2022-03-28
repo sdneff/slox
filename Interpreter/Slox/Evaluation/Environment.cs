@@ -55,7 +55,32 @@ public class Environment
         throw new RuntimeError(name, $"Undefined variable '{name.Lexeme}'.");
     }
 
+    public void AssignAt(int distance, Token token, object? value)
+    {
+        var environment = Ancestor(distance) ?? throw new RuntimeError(token, "Invalid environment resolution depth.");
+
+        environment._values[token.Lexeme] = value;
+    }
+
     public object? GetValue(string name) => _values.ContainsKey(name)
             ? _values.GetValueOrDefault(name)
             : _enclosing?.GetValue(name);
+
+    public object? GetAt(int distance, Token name)
+    {
+        var environment = Ancestor(distance) ?? throw new RuntimeError(name, "Invalid environment resolution depth.");
+
+        return environment._values[name.Lexeme];
+    }
+
+    private Environment? Ancestor(int distance)
+    {
+        var environment = this;
+        for (var i = 0; i < distance; ++i)
+        {
+            environment = environment?._enclosing;
+        }
+
+        return environment;
+    }
 }
